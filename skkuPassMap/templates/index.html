@@ -4,16 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>skkuPassMap</title>
+
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
     />
+
+    <!-- 아이콘 라이브러리 -->
+    <link
+      rel="stylesheet"
+      href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css"
+    />
   </head>
   <body>
     <h1>skkuPassMap</h1>
+
+    <div class="top-bar">
+      <select id="areaSelect">
+        <option value="">카테고리 선택</option>
+        <option value="식당">식당</option>
+        <option value="카페">카페</option>
+        <option value="술집">술집</option>
+        <option value="편의시설">편의시설</option>
+      </select>
+
+      <select id="placeSelect" disabled>
+        <option value="">장소 선택</option>
+      </select>
+    </div>
+
+    <div id="infoBox">
+      <p><strong>이름:</strong> <span id="placeName">-</span></p>
+      <p><strong>주소:</strong> <span id="address">-</span></p>
+      <p><strong>혜택:</strong> <span id="benefit">-</span></p>
+    </div>
+
     <div id="map"></div>
 
-    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={{ kakao_js_key }}"></script>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={{ kakao_js_key }}&libraries=services&autoload=false"></script>
+    <script src="{{ url_for('static', filename='js/data.js') }}"></script>
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
   </body>
 </html>

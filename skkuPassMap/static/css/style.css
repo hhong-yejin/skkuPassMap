@@ -1,6 +1,5 @@
 body {
   font-family: Arial, sans-serif;
-  text-align: center;
   margin: 0;
   padding: 20px;
 }
@@ -9,9 +8,89 @@ h1 {
   margin-bottom: 20px;
 }
 
+.top-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+select {
+  padding: 10px;
+  min-width: 220px;
+}
+
+#infoBox {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
 #map {
   width: 100%;
   height: 500px;
-  margin: 0 auto;
   border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* 핀 모양 마커 전체 */
+.category-marker {
+  position: relative;
+  width: 36px;
+  height: 48px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.category-marker-head {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: var(--marker-color, #27ae60);
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 16px;
+  position: relative;
+}
+
+.category-marker-head::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 12px solid var(--marker-color, #27ae60);
+}
+
+.category-marker i {
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 장소 라벨 */
+.place-label {
+  display: inline-block;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: #111111;
+  background: #ffffff;
+  border: 1px solid #8aa0d6;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
