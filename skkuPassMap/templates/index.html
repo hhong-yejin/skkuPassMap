@@ -10,14 +10,13 @@
       href="{{ url_for('static', filename='css/style.css') }}"
     />
 
-    <!-- 아이콘 라이브러리 -->
     <link
       rel="stylesheet"
       href="https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css"
     />
   </head>
   <body>
-    <h1>skkuPassMap</h1>
+    <h1 class="title">skkuPassMap</h1>
 
     <div class="top-bar">
       <select id="areaSelect">
@@ -28,18 +27,26 @@
         <option value="편의시설">편의시설</option>
       </select>
 
+      <select id="typeSelect" disabled>
+        <option value="">종류 선택</option>
+      </select>
+
       <select id="placeSelect" disabled>
         <option value="">장소 선택</option>
       </select>
     </div>
 
     <div id="infoBox">
-      <p><strong>이름:</strong> <span id="placeName">-</span></p>
-      <p><strong>주소:</strong> <span id="address">-</span></p>
-      <p><strong>혜택:</strong> <span id="benefit">-</span></p>
+      <p>이름: <span id="placeName">-</span></p>
+      <p>주소: <span id="address">-</span></p>
+      <p>혜택: <span id="benefit">-</span></p>
     </div>
 
     <div id="map"></div>
+
+    <script>
+      window.KAKAO_JS_KEY = "{{ kakao_js_key }}";
+    </script>
 
     <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={{ kakao_js_key }}&libraries=services&autoload=false"></script>
     <script src="{{ url_for('static', filename='js/data.js') }}"></script>

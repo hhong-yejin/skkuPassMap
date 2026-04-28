@@ -2,8 +2,8 @@ let map;
 let geocoder;
 let placeMarkers = [];
 let activeLabelOverlay = null;
-
 let categorySelect;
+let typeSelect;
 let placeSelect;
 
 // 카테고리별 아이콘/색상
@@ -32,11 +32,14 @@ function getAllPlaces() {
 
   for (const category in data) {
     for (const name in data[category]) {
+      const item = data[category][name];
+
       allPlaces.push({
         category,
         name,
-        address: data[category][name].주소,
-        benefit: data[category][name].혜택,
+        type: item.종류 || "",
+        address: item.주소 || "",
+        benefit: item.혜택 || "-",
       });
     }
   }
@@ -46,26 +49,70 @@ function getAllPlaces() {
 
 // 정보 박스 업데이트
 function updateInfo(name = "-", address = "-", benefit = "-") {
-  document.getElementById("placeName").textContent = name;
-  document.getElementById("address").textContent = address;
-  document.getElementById("benefit").textContent = benefit;
+  const nameEl =
+    document.getElementById("placeName") ||
+    document.getElementById("restaurantName");
+  const addressEl = document.getElementById("address");
+  const benefitEl = document.getElementById("benefit");
+
+  if (nameEl) nameEl.textContent = name;
+  if (addressEl) addressEl.textContent = address;
+  if (benefitEl) benefitEl.textContent = benefit;
 }
 
 // 장소 선택 드롭다운 초기화
 function resetPlaceSelect() {
+  if (!placeSelect) return;
   placeSelect.innerHTML = '<option value="">장소 선택</option>';
   placeSelect.disabled = true;
 }
 
-// 카테고리에 맞는 장소 목록 채우기
-function populatePlaceOptions(category) {
+// 종류 선택 드롭다운 초기화
+function resetTypeSelect() {
+  if (!typeSelect) return;
+  typeSelect.innerHTML = '<option value="">종류 선택</option>';
+  typeSelect.disabled = true;
+}
+
+// 카테고리에 맞는 종류 목록 채우기
+function populateTypeOptions(category) {
+  resetTypeSelect();
+
+  if (!category || !data[category]) return;
+
+  const typeSet = new Set();
+
+  for (const name in data[category]) {
+    const type = data[category][name].종류;
+    if (type) typeSet.add(type);
+  }
+
+  const sortedTypes = Array.from(typeSet).sort((a, b) =>
+    a.localeCompare(b, "ko"),
+  );
+
+  sortedTypes.forEach((type) => {
+    const option = document.createElement("option");
+    option.value = type;
+    option.textContent = type;
+    typeSelect.appendChild(option);
+  });
+
+  typeSelect.disabled = false;
+}
+
+// 카테고리/종류에 맞는 장소 목록 채우기
+function populatePlaceOptions(category, selectedType = "") {
   resetPlaceSelect();
 
   if (!category || !data[category]) return;
 
-  const places = Object.keys(data[category]).sort((a, b) =>
-    a.localeCompare(b, "ko"),
-  );
+  const places = Object.keys(data[category])
+    .filter((name) => {
+      if (!selectedType) return true;
+      return data[category][name].종류 === selectedType;
+    })
+    .sort((a, b) => a.localeCompare(b, "ko"));
 
   places.forEach((name) => {
     const option = document.createElement("option");
@@ -78,9 +125,13 @@ function populatePlaceOptions(category) {
 }
 
 // 드롭다운 자동 동기화
-function syncDropdowns(category, placeName) {
+function syncDropdowns(category, type, placeName) {
+  if (!categorySelect || !typeSelect || !placeSelect) return;
+
   categorySelect.value = category;
-  populatePlaceOptions(category);
+  populateTypeOptions(category);
+  typeSelect.value = type || "";
+  populatePlaceOptions(category, type || "");
   placeSelect.value = placeName;
 }
 
@@ -141,12 +192,23 @@ function showPlaceLabel(category, name, coords) {
   });
 }
 
-// 기본 마커 전체 표시
-function displayAllMarkers() {
+// 기존 마커 제거
+function clearPlaceMarkers() {
+  placeMarkers.forEach((overlay) => overlay.setMap(null));
+  placeMarkers = [];
+  clearActiveLabel();
+}
+
+// 지도에 마커 표시
+function displayMarkers(category = "", selectedType = "") {
+  clearPlaceMarkers();
+
   const allPlaces = getAllPlaces();
 
   allPlaces.forEach((place) => {
     if (!place.address) return;
+    if (category && place.category !== category) return;
+    if (selectedType && place.type !== selectedType) return;
 
     geocoder.addressSearch(place.address, function (result, status) {
       if (status !== kakao.maps.services.Status.OK) {
@@ -168,9 +230,9 @@ function displayAllMarkers() {
 
       content.addEventListener("click", function () {
         focusPlace(coords);
-        syncDropdowns(place.category, place.name);
+        syncDropdowns(place.category, place.type, place.name);
         showPlaceLabel(place.category, place.name, coords);
-        updateInfo(place.name, place.address, place.benefit || "-");
+        updateInfo(place.name, place.address, place.benefit);
       });
     });
   });
@@ -196,10 +258,19 @@ function moveMapByAddress(address, name, benefit, category) {
 
 window.onload = function () {
   categorySelect = document.getElementById("areaSelect");
+  typeSelect = document.getElementById("typeSelect");
   placeSelect = document.getElementById("placeSelect");
 
+  const mapContainer = document.getElementById("map");
+
+  if (!categorySelect || !typeSelect || !placeSelect || !mapContainer) {
+    console.error(
+      "필요한 HTML id(areaSelect, typeSelect, placeSelect, map)가 없습니다.",
+    );
+    return;
+  }
+
   kakao.maps.load(function () {
-    const mapContainer = document.getElementById("map");
     const skkuPosition = new kakao.maps.LatLng(37.5883, 126.9946);
 
     map = new kakao.maps.Map(mapContainer, {
@@ -209,14 +280,25 @@ window.onload = function () {
 
     geocoder = new kakao.maps.services.Geocoder();
 
-    displayAllMarkers();
+    // 처음에는 전체 마커 표시
+    displayMarkers();
 
     categorySelect.addEventListener("change", function () {
       const selectedCategory = this.value;
 
-      populatePlaceOptions(selectedCategory);
+      populateTypeOptions(selectedCategory);
+      populatePlaceOptions(selectedCategory, "");
+      displayMarkers(selectedCategory, "");
       updateInfo();
-      clearActiveLabel();
+    });
+
+    typeSelect.addEventListener("change", function () {
+      const selectedCategory = categorySelect.value;
+      const selectedType = this.value;
+
+      populatePlaceOptions(selectedCategory, selectedType);
+      displayMarkers(selectedCategory, selectedType);
+      updateInfo();
     });
 
     placeSelect.addEventListener("change", function () {
