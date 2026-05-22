@@ -16,9 +16,11 @@ SKKUPASSMAP/
 ├─ README.md                # 프로젝트 설명
 └─ requirements.txt         # 필요한 라이브러리 목록
 
+1. 로컬 실행 방법
+cd skkuPassMap/
 pip install -r requirements.txt
 python app.py
-
-또는 아래 ender 서버 접속
+2. Render 배포 서버 접속 방법
+아래 URL 접속
 https://skkupassmap.onrender.com/
 ```
