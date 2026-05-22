@@ -18,4 +18,7 @@ SKKUPASSMAP/
 
 pip install -r requirements.txt
 python app.py
+
+또는 아래 ender 서버 접속
+https://skkupassmap.onrender.com/
 ```
